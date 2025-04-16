@@ -12,5 +12,5 @@ app.get('/', (req, res) => {
 app.use('/movies', movieRoutes);
 
 app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000'); //app listening in port 3000
+  console.log('Server is running on http://localhost:3000');
 });
