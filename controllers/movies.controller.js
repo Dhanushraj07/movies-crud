@@ -24,7 +24,7 @@ export const movieIndex = async(req, res) => {
         return res.status(500).json({ error: error.message });
     }
   };
-
+ 
   export const movieUpdate = async(req, res) => {
     try {
         const movie = await Movie.findOneAndUpdate(
@@ -43,6 +43,7 @@ export const movieIndex = async(req, res) => {
     try {
         await Movie.deleteOne({_id: id});
         return res.status(200).json({ message: 'Movie deleted successfully' });
+        
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

@@ -20,11 +20,11 @@
 
   <button onclick="addMovie()">Add Movie</button>
 
-  <h2>All Movies</h2>
+  <h2>All Movies List</h2>
   <div id="movieList"></div>
 
   <script>
-    const apiBase = 'http://localhost:3000/movies';
+    const apiBase = 'http://localhost:3000/api/movies';
 
     // 🔁 Fetch all movies
     async function fetchMovies() {
@@ -69,6 +69,7 @@
     async function deleteMovie(id) {
       await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
       fetchMovies();
+      alert('Movie deleted!');
     }
 
     // ✏️ Show update prompt and send update
@@ -83,6 +84,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: newTitle, language: newLang, year: newYear })
         });
+        alert('Movie updated successfully!');
         fetchMovies();
       }
     }

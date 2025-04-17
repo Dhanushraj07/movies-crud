@@ -8,11 +8,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 connectDb();
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello, World!' });
-});
 
-app.use('/movies', movieRoutes);
+app.use('/movies', express.static('public'));
+
+
+
+app.use('/api/movies', movieRoutes);
 
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
