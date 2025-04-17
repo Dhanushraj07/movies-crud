@@ -1,5 +1,14 @@
 import Movie from "../models/movies.model.js";
 
+export const movieCount = async (req, res) => {
+    try {
+        const count = await Movie.countDocuments();
+        return res.status(200).json({ count });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 export const movieIndex = async(req, res) => {
     try {
         const movie = await Movie.find();
