@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie CRUD App</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    input, button { margin: 5px; padding: 6px; }
+    .movie { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Movie CRUD</h1>
+
+  <h2>Add New Movie</h2>
+  <input type="text" id="title" placeholder="Title" required/>
+  <input type="text" id="language" placeholder="Language" required/>
+  <input type="number" id="year" placeholder="Year" required/>
+
+  <button onclick="addMovie()">Add Movie</button>
+
+  <h2>All Movies</h2>
+  <div id="movieList"></div>
+
+  <script>
+    const apiBase = 'http://localhost:3000/movies';
+
+    // 🔁 Fetch all movies
+    async function fetchMovies() {
+      const res = await fetch(apiBase);
+      const data = await res.json();
+
+      const container = document.getElementById('movieList');
+      container.innerHTML = '';
+
+      data.forEach(movie => {
+        const div = document.createElement('div');
+        div.className = 'movie';
+        div.innerHTML = `
+          <strong>${movie.title}</strong> (${movie.language}, ${movie.year})<br>
+          <button onclick="deleteMovie('${movie._id}')">🗑 Delete</button>
+          <button onclick="showUpdateForm('${movie._id}', '${movie.title}', '${movie.language}', ${movie.year})">✏️ Update</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ➕ Add a movie
+    async function addMovie() {
+      const title = document.getElementById('title').value;
+      const language = document.getElementById('language').value;
+      const year = document.getElementById('year').value;
+
+      await fetch(apiBase, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, language, year })
+      });
+      alert('Movie added!');
+      // Clear input fields after adding a movie
+      document.getElementById('title').value = '';
+      document.getElementById('language').value = '';
+      document.getElementById('year').value = '';
+      fetchMovies();
+    }
+
+    // 🗑 Delete a movie
+    async function deleteMovie(id) {
+      await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+      fetchMovies();
+    }
+
+    // ✏️ Show update prompt and send update
+    async function showUpdateForm(id, oldTitle, oldLang, oldYear) {
+      const newTitle = prompt('Enter new title:', oldTitle);
+      const newLang = prompt('Enter new language:', oldLang);
+      const newYear = prompt('Enter new year:', oldYear);
+
+      if (newTitle && newLang && newYear) {
+        await fetch(`${apiBase}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: newTitle, language: newLang, year: newYear })
+        });
+        fetchMovies();
+      }
+    }
+
+    // Initial load
+    fetchMovies();
+  </script>
+</body>
+</html>
