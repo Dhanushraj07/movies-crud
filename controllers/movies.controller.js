@@ -11,7 +11,17 @@ export const movieCount = async (req, res) => {
     }
     
 };
-
+export const movieShow = async (req, res) => {
+    try {
+        const movie = await Movie.find(req.query);
+        if (!movie) {
+            return res.status(404).json({ message: 'Movie not found' });
+        }
+        return res.status(200).json(movie);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
 export const movieIndex = async(req, res) => {
     try {
         const movie = await Movie.find();
