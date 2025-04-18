@@ -4,12 +4,14 @@ const movieRoutes = require('./routes/movie.route');
 const connectDb = require('./lib/db');
 const cors = require('cors');
 app.use(cors());
-
+app.set('view engine', 'pug');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 connectDb();
 
-app.use('/movies', express.static('public'));
+app.get('/', (req, res) => {
+  res.status(200).render('index');
+});
 
 
 
