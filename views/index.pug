@@ -24,10 +24,14 @@ html(lang="en")
     
     script.
       const apiBase = '/api/movies';
-
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDY2MDI1MzU4MDg0OWZhMThjMjVhNyIsImlhdCI6MTc0NTI0ODk0OSwiZXhwIjoxNzQ1MzM1MzQ5fQ.IbintyrUNcHEAadZEGerqOpqvL2tSPYBQ8OztVGEGQ4';
       // 🔁 Fetch all movies
       async function fetchMovies() {
-        const res = await fetch(apiBase);
+        const res = await fetch(apiBase,{
+            headers: {
+            Authorization: `Bearer ${token}`
+          }
+     });
         const data = await res.json();
         console.log("The data fetched from db are : ",data);
         const container = document.getElementById('movieList');

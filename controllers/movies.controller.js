@@ -1,5 +1,5 @@
 import Movie from "../models/movies.model.js";
-
+import User from "../models/userModel.js";
 // export const movieCount = async (req, res) => {
 //     try {
 //         const count = await Movie.countDocuments();
@@ -79,3 +79,12 @@ export const movieIndex = async(req, res) => {
         return res.status(500).json({ error: error.message });
     }
   };
+
+  export const userDetails = async (req, res) => {
+    try {
+        const user = await User.find();
+        return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+  }
