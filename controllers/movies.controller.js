@@ -18,7 +18,7 @@ export const movieShow = async (req, res) => {
         const limit = req.query.limit * 1 || 5;
         const skip = (page - 1) * limit;
         // Define base query
-        let query = Movie.find(); 
+        let query = Movie.find().sort({title: 1});
         // Apply pagination
         query = query.skip(skip).limit(limit);
         // Execute the query

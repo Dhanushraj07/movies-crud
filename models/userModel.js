@@ -5,7 +5,9 @@ import bcrypt from "bcryptjs"; // 🔐 Import bcrypt
 const userSchema = new Schema({
   name: {
     type: String,
-    required: [true, "Name is required"]
+    required: [true, "Name is required"],
+    set: (name) =>
+      name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
   },
   email: {
     type: String,
@@ -47,5 +49,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+
+// 🔐 Password Comparison Method
+userSchema.methods.correctPassword = async function (candidatePassword,userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 const User = model("User", userSchema);
 export default User;
