@@ -16,10 +16,12 @@ html(lang="en")
     input(type="text", id="language", placeholder="Language", required)
     input(type="number", id="year", placeholder="Year", required)
     button(onclick="addMovie()") Add Movie
+    h2 Total movie: 
+      span(id="total")
 
     h2 All Movies List
     #movieList
-
+    
     script.
       const apiBase = '/api/movies';
 
@@ -30,16 +32,25 @@ html(lang="en")
         console.log("The data fetched from db are : ",data);
         const container = document.getElementById('movieList');
         container.innerHTML = '';
-
+        const total_container = document.getElementById('total');
+        
+          
+         total_container.innerHTML = `
+            <strong>${data.length}</strong>
+          `;
+          
+        // Display each movieList
         data.forEach(movie => {
-          const div = document.createElement('div');
-          div.className = 'movie';
-          div.innerHTML = `
+           
+          const div2 = document.createElement('div');
+          div2.className = 'movie';
+          div2.innerHTML = `
             <strong>${movie.title}</strong> (${movie.language}, ${movie.year})<br>
             <button onclick="deleteMovie('${movie._id}')">🗑 Delete</button>
             <button onclick="showUpdateForm('${movie._id}', '${movie.title}', '${movie.language}', ${movie.year})">✏️ Update</button>
           `;
-          container.appendChild(div);
+
+          container.appendChild(div2);
         });
       }
 

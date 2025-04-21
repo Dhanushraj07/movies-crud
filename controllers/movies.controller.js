@@ -1,30 +1,39 @@
 import Movie from "../models/movies.model.js";
 
-export const movieCount = async (req, res) => {
-    try {
-        const count = await Movie.countDocuments();
-        console.log("Total movies in database:", count);
-        return res.status(200).json({ count });
+// export const movieCount = async (req, res) => {
+//     try {
+//         const count = await Movie.countDocuments();
+//         console.log("Total movies in database:", count);
+//         return res.status(200).json({ count});
         
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
+//     } catch (error) {
+//         return res.status(500).json({ error: error.message });
+//     }
     
-};
+// };
+//PAGINATION
 export const movieShow = async (req, res) => {
     try {
-        const movie = await Movie.find(req.query);
-        if (!movie) {
-            return res.status(404).json({ message: 'Movie not found' });
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 5;
+        const skip = (page - 1) * limit;
+        // Define base query
+        let query = Movie.find(); 
+        // Apply pagination
+        query = query.skip(skip).limit(limit);
+        // Execute the query
+        const movies = await query;
+        if (!movies || movies.length === 0) {
+            return res.status(404).json({ message: 'No movies found' });
         }
-        return res.status(200).json(movie);
+        return res.status(200).json(movies);
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
-}
+};
 export const movieIndex = async(req, res) => {
     try {
-        const movie = await Movie.find();
+        const movie = await Movie.find().sort({title: 1});
         return res.status(200).json(movie);
     } catch (error) {
         return res.status(500).json({ error: error.message });
