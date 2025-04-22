@@ -18,6 +18,11 @@ const userSchema = new Schema({
       message: "Please provide a valid email"
     }
   },
+  role:{
+    type: String,
+    enum: ["user", "admin"],
+    default: "user"
+  },
   password: {
     type: String,
     required: [true, "Password is required"],
@@ -33,7 +38,8 @@ const userSchema = new Schema({
       },
       message: "Passwords do not match"
     }
-  }
+  },
+  passwordChangedAt: Date,
 });
 
 // 🔐 Password Hashing Middleware
@@ -54,5 +60,19 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.correctPassword = async function (candidatePassword,userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < changedTimestamp;
+  }
+  // False means NOT changed
+  return false;
+};
+  
+// userSchema.methods.createPasswordChangedAt = function () {
+//   this.passwordChangedAt = Date.now() - 1000; // subtract 1 second to ensure the token is valid
+//   return this.passwordChangedAt;
+// };
 const User = model("User", userSchema);
 export default User;

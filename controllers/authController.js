@@ -89,7 +89,7 @@ export const protect = async (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
     }
-    console.log(req.headers); // 👀 See if 'authorization' key is present
+    //console.log(req.headers); // 👀 See if 'authorization' key is present
 
     console.log(token);
     if(!token) {
@@ -100,8 +100,56 @@ export const protect = async (req, res, next) => {
     }
     const decoded = await util.promisify(jwt.verify)(token, process.env.JWT_SECRET);
     console.log("decoded",decoded);
-    next();
+    // Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+        return res.status(401).json({
+            status: 'fail',
+            message: 'The user belonging to this token no longer exists.',
+        });
+    }
+    // Check if user changed password after token was issued
+    if(currentUser.changedPasswordAfter(decoded.iat)){
+        return res.status(401).json({
+            status: 'fail',
+            message: 'User recently changed password! Please log in again.',
+        });
+    }
+    // Grant access to protected route
+    req.user = currentUser;
+    console.log("Request user",req.user);
+    next(); 
 }
+
+
+// This function can be used to restrict access to certain routes based on user roles
+export const restrictTo = (role) => {
+    return (req, res, next) => {
+        // Check if user has the required role
+        if (req.user.role !== role) { 
+            return res.status(403).json({
+                status: 'fail',
+                message: 'You do not have permission to perform this action!',
+            });
+        }
+        next();
+    };
+}
+
+
+// If we have many roles, we can use this function
+// export const restrictTo = (...roles) => {
+//     return (req, res, next) => {
+//         // Check if user has the required role
+//         if (!roles.includes(req.user.role)) { 
+//             return res.status(403).json({
+//                 status: 'fail',
+//                 message: 'You do not have permission to perform this action!',
+//             });
+//         }
+//         next();
+//     };
+// }
 
 
 
