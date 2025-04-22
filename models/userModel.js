@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs"; // 🔐 Import bcrypt
-
+import crypto from "crypto"; // 🔐 Import crypto
 const userSchema = new Schema({
   name: {
     type: String,
@@ -40,6 +40,8 @@ const userSchema = new Schema({
     }
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // 🔐 Password Hashing Middleware
@@ -70,9 +72,16 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
   
-// userSchema.methods.createPasswordChangedAt = function () {
-//   this.passwordChangedAt = Date.now() - 1000; // subtract 1 second to ensure the token is valid
-//   return this.passwordChangedAt;
-// };
+userSchema.methods.createResetToken = function () {
+  // Create a reset token (for password reset)
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  // Hash the token and set it to the passwordResetToken field
+  this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+  // Set the expiration time for the token
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  console.log(resetToken, this.passwordResetToken, this.passwordResetExpires);
+  // Return the un-hashed token to send to the user
+  return resetToken;
+}
 const User = model("User", userSchema);
 export default User;

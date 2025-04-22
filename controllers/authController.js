@@ -3,6 +3,10 @@ import User from '../models/userModel.js';
 //const jwt = require('jsonwebtoken');
 import jwt from 'jsonwebtoken';
 import util from 'util';
+import dotenv from 'dotenv';
+dotenv.config({ path: './config.env' });
+import { sendEmail } from '../utils/email.js';
+import crypto from 'crypto';
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
@@ -151,6 +155,83 @@ export const restrictTo = (role) => {
 //     };
 // }
 
+
+
+export const forgotPassword = async (req, res) => {
+  try {
+    // 1. Get user based on POSTed email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'There is no user with this email address!',
+      });
+    }
+
+    // 2. Generate random reset token
+    const resetToken = user.createResetToken(); // Make sure this is defined in your schema
+    await user.save({ validateBeforeSave: false });
+
+    // 3. Create reset URL and message
+    const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+
+    // 4. Send email
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 min)',
+      text: message,
+    });
+
+    // 5. Respond with success
+    res.status(200).json({
+      status: 'success',
+      message: 'Reset Token sent to email!',
+    });
+
+  } catch (error) {
+    // If email fails to send
+    console.error('Error in forgotPassword:', error);
+    if (user) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+    }
+    res.status(500).json({
+      status: 'error',
+      message: 'There was an error sending the email. Try again later!',
+    });
+  }
+};
+  export const resetPassword = async (req, res) => {
+      const token = crypto.createHash('sha256').update(req.params.token).digest('hex');
+      const user = await User.findOne({
+          passwordResetToken: token,
+          passwordResetExpires: { $gt: Date.now() },
+      });
+      if (!user) {
+          return res.status(400).json({
+              status: 'fail',
+              message: 'Token is invalid or has expired!',
+          });
+      }
+      user.password = req.body.password;
+      user.confirmPassword = req.body.confirmPassword;
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      user.passwordChangedAt = Date.now();
+      await user.save();
+
+      //Login the user after password reset
+      // Generate JWT token
+      const logintoken = signToken(user._id);
+      res.status(200).json({
+          status: 'success',
+          token: logintoken,
+          message: 'Password reset successful!',
+      });
+
+  }
 
 
 
