@@ -28,11 +28,11 @@ html(lang="en")
     
     script.
       const apiBase = '/api/movies';
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDcxYTFhMmQ1N2ZhMWZmODBkOWMzOSIsImlhdCI6MTc0NTMzNzA5MSwiZXhwIjoxNzQ1NDIzNDkxfQ.u-0laFv0NiYvrMbNkN6NuD3wgf3VeJfBn31_RDgw08o";
+     // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDg2YjAwYjJiNWI4YjEyZjEzMTI5ZCIsImlhdCI6MTc0NTM4NTEwMiwiZXhwIjoxNzQ1Mzg4NzAyfQ.Q7TCArWcDcYzxdnl316JvUsAzje_ZEWUXYkeLhxKioA";
       // 👤 Fetch user data
       async function fetchUser() {
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch('/api/user/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }

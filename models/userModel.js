@@ -23,6 +23,7 @@ const userSchema = new Schema({
     enum: ["user", "admin"],
     default: "user"
   },
+  
   password: {
     type: String,
     required: [true, "Password is required"],
@@ -38,6 +39,11 @@ const userSchema = new Schema({
       },
       message: "Passwords do not match"
     }
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false // hide active from query results
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
@@ -57,6 +63,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+//check user is active or not
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 // 🔐 Password Comparison Method
 userSchema.methods.correctPassword = async function (candidatePassword,userPassword) {

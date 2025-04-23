@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const movieRoutes = require('./routes/movie.route');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const connectDb = require('./lib/db');
 const cors = require('cors');
 app.use(cors());
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/movies', movieRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });

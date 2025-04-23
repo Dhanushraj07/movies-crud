@@ -1,6 +1,3 @@
-//createSendResponse function
-// This function is used to send a response with the token and user data
-
 
 import User from '../models/userModel.js';
 //const jwt = require('jsonwebtoken');
@@ -10,32 +7,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './config.env' });
 import { sendEmail } from '../utils/email.js';
 import crypto from 'crypto';
-
 export const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
-    });
-}
-
-export const createSendResponse = (user, statusCode, req, res) => { 
-  console.log("🔐 Sending response and setting cookie for user:", user.email);
-    const token = signToken(user._id);
-
-    const cookieOptions = {
-      maxAge: process.env.JWT_COOKIE_EXPIRES_IN,
-      httpOnly: true
-  }
-  if(process.env.NODE_ENV === 'production') 
-      cookieOptions.secure = true; // Set to true in production
-
-    res.cookie('jwt', token, cookieOptions);
-    user.password = undefined; // Remove password from response
-    res.status(statusCode).json({
-        status: 'success',
-        token,
-        data: {
-          user
-        }
     });
 }
 
@@ -45,12 +19,17 @@ export const signup = async (req, res) => {
       const newUser = await User.create(req.body);
       console.log(newUser);
       // Generate JWT token
-      createSendResponse(newUser, 201, req, res);
+      const token = signToken(newUser._id);  
+      res.status(201).json({
+        status: 'success',
+        token,
+        data: {
+          user: newUser,
+        },
+      });
     } catch (error) {
       // Handle duplicate email (code 11000)
       if (error.code === 11000 && error.keyPattern.email) {
-        res.clearCookie('jwt');
-        console.log("Cleared cookie due to duplicate email error.");
         return res.status(400).json({
           status: 'fail',
           message: 'Email already exists, please login',
@@ -86,7 +65,19 @@ export const login = async (req, res) => {
                 message: 'Incorrect email or password!',
             });
         }
-        createSendResponse(user, 200, req, res); // Send response with token and user data
+
+        // Generate JWT token
+        const token = signToken(user._id);
+
+        // Optional: remove password from response
+        user.password = undefined;
+        //console.log(user);
+        res.status(200).json({
+            status: 'success',
+            message: 'User logged in successfully!',
+            token,
+            user,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -233,7 +224,12 @@ export const forgotPassword = async (req, res) => {
 
       //Login the user after password reset
       // Generate JWT token
-      createSendResponse(user, 200, req, res);
+      const logintoken = signToken(user._id);
+      res.status(200).json({
+          status: 'success',
+          token: logintoken,
+          message: 'Password reset successful!',
+      });
 
   }
 
