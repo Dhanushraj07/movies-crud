@@ -17,7 +17,7 @@ export const signToken = (id) => {
     });
 }
 
-export const createSendResponse = (user, statusCode, req, res) => { 
+export const createSendResponse = (user, statusCode,message, req, res) => { 
   console.log("🔐 Sending response and setting cookie for user:", user.email);
     const token = signToken(user._id);
 
@@ -32,6 +32,7 @@ export const createSendResponse = (user, statusCode, req, res) => {
     user.password = undefined; // Remove password from response
     res.status(statusCode).json({
         status: 'success',
+        message,
         token,
         data: {
           user
@@ -45,7 +46,7 @@ export const signup = async (req, res) => {
       const newUser = await User.create(req.body);
       console.log(newUser);
       // Generate JWT token
-      createSendResponse(newUser, 201, req, res);
+      createSendResponse(newUser, 201,`New user ${newUser.name} created successfully`, req, res);
     } catch (error) {
       // Handle duplicate email (code 11000)
       if (error.code === 11000 && error.keyPattern.email) {
@@ -86,7 +87,7 @@ export const login = async (req, res) => {
                 message: 'Incorrect email or password!',
             });
         }
-        createSendResponse(user, 200, req, res); // Send response with token and user data
+        createSendResponse(user, 200,`${user.name} Loggined successfully`, req, res); // Send response with token and user data
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -233,7 +234,7 @@ export const forgotPassword = async (req, res) => {
 
       //Login the user after password reset
       // Generate JWT token
-      createSendResponse(user, 200, req, res);
+      createSendResponse(user, 200,'Password reset successfully', req, res);
 
   }
 

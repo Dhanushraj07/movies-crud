@@ -7,8 +7,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './config.env' });
 import { sendEmail } from '../utils/email.js';
 import crypto from 'crypto';
-import { signToken } from './authController.js';
-
+//import { signToken } from './authController.js';
+import {createSendResponse} from './authController.js';
 
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
@@ -37,11 +37,12 @@ export const updatePassword = async (req, res) => {
     await user.save();
 
     // 4. Log the user in, send JWT
-    const token = signToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token,
-    });
+    // const token = signToken(user._id);
+    // res.status(200).json({
+    //     status: 'success',
+    //     token,
+    // });
+    createSendResponse(user,'Password Updated Successfully', 200, req, res);
 }
 //login userDetails
 export const getMe = async (req, res) => {
