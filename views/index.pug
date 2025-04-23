@@ -9,7 +9,11 @@ html(lang="en")
       .movie { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
 
   body
+    div(style="text-align: right; font-weight: bold; margin-bottom: 20px;")
+      | Logged in as: 
+      span(id="username")
     h1 🎬 Movie CRUD
+  
 
     h2 Add New Movie
     input(type="text", id="title", placeholder="Title", required)
@@ -24,7 +28,31 @@ html(lang="en")
     
     script.
       const apiBase = '/api/movies';
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDcyY2NkYThjMzBiYTFmOTY1OTZkMCIsImlhdCI6MTc0NTMyMjEwMCwiZXhwIjoxNzQ1MzI1NzAwfQ.lyoNIC3j3D5e0BcszfD0k-rPsFfWDm_gh70pOwkKOjQ";
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDcxYTFhMmQ1N2ZhMWZmODBkOWMzOSIsImlhdCI6MTc0NTMzNzA5MSwiZXhwIjoxNzQ1NDIzNDkxfQ.u-0laFv0NiYvrMbNkN6NuD3wgf3VeJfBn31_RDgw08o";
+      // 👤 Fetch user data
+      async function fetchUser() {
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) throw new Error('User fetch failed');
+
+        const user = await res.json();
+        console.log('Logged-in user:', user);
+
+        // Display username
+        document.getElementById('username').textContent = user.name || user.username || user.email || 'User';
+      } catch (err) {
+        console.error('Error fetching user:', err.message);
+        document.getElementById('username').textContent = 'Guest';
+      }
+      }
+      fetchUser();
+
+     
       // 🔁 Fetch all movies
       async function fetchMovies() {
         const res = await fetch(apiBase,{

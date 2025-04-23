@@ -233,7 +233,39 @@ export const forgotPassword = async (req, res) => {
 
   }
 
+  export const updatePassword = async (req, res) => {
+    // 1. Get user from collection
+    const user = await User.findById(req.user.id).select('+password');
 
+    // 2. Check if POSTed current password is correct
+    if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
+        return res.status(401).json({
+            status: 'fail',
+            message: 'Your current password is wrong!',
+        });
+    }
+
+    // 3. If so, update password
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+    await user.save();
+
+    // 4. Log the user in, send JWT
+    const token = signToken(user._id);
+    res.status(200).json({
+        status: 'success',
+        token,
+    });
+}
+
+//login userDetails
+export const getMe = async (req, res) => {
+  try {
+    res.status(200).json(req.user); // req.user is set in protect middleware
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 
